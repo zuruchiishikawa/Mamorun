@@ -5,19 +5,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MamoRun</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-        /* フォント読み込み: 
-           Inter(本文用), 
-           Barlow Semi Condensed(数字用),
-           Varela Round(タイトル用 - 丸いフォント)
-        */
+        /* =========================================
+           フォント設定
+           ========================================= */
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Inter:wght@500;700&family=Varela+Round&display=swap');
 
-        /* ベーススタイル */
+        /* =========================================
+           オープニングアニメーションのスタイル
+           ========================================= */
+        #opening-screen {
+            position: fixed;
+            inset: 0; /* 全画面 */
+            z-index: 9999; /* 最前面 */
+            background-color: #10b981; /* アプリのメインカラー(Emerald-500) */
+            
+            /* CSSで水玉模様（ドット柄）を作成 - サイズを大きく調整 */
+            background-image: 
+                radial-gradient(circle, rgba(255,255,255,0.25) 7px, transparent 7px),
+                radial-gradient(circle, rgba(255,255,255,0.25) 7px, transparent 7px);
+            background-size: 90px 90px; /* ドットの間隔を大きく */
+            background-position: 0 0, 45px 45px; /* 位置をずらして互い違いに配置 */
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            /* フェードアウト用トランジション */
+            transition: opacity 0.6s ease-out, visibility 0.6s;
+        }
+
+        /* フェードアウト時の状態 */
+        #opening-screen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* オープニングロゴ */
+        .opening-title {
+            font-family: "Varela Round", sans-serif;
+            /* レスポンシブフォントサイズ: 最小3.5rem, 推奨14vw, 最大7rem */
+            font-size: clamp(3.5rem, 14vw, 7rem);
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.02em;
+
+            /* 文字をさらに太く見せるための縁取り設定 */
+            -webkit-text-stroke: 4px white;
+            paint-order: stroke fill;
+            
+            /* 弾むアニメーション */
+            animation: bounceLogo 1.4s cubic-bezier(0.25, 1, 0.5, 1) both;
+        }
+
+        /* 弾む動きのキーフレーム */
+        @keyframes bounceLogo {
+            0% {
+                opacity: 0;
+                transform: translateY(60px) scale(0.8);
+            }
+            40% {
+                opacity: 1;
+                transform: translateY(-20px) scale(1.1);
+            }
+            65% {
+                transform: translateY(10px) scale(0.95);
+            }
+            85% {
+                transform: translateY(-5px) scale(1.02);
+            }
+            100% {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* =========================================
+           メインアプリのスタイル
+           ========================================= */
+
         body {
-            /* 日本語は游ゴシック、英数字はInter */
-            font-family: "Inter", "Yu Gothic Medium", "Yu Gothic", YuGothic, "Hiragino Kaku Gothic ProN", "Hiragino Kaku Gothic Pro", "Meiryo", sans-serif;
+            font-family: "Inter", "Yu Gothic Medium", "Yu Gothic", sans-serif;
             background: #f0f4f8;
             color: #475569;
             -webkit-tap-highlight-color: transparent;
@@ -35,8 +106,6 @@
             }
         }
 
-        /* --- コンポーネントスタイル --- */
-
         .app-container {
             width: 100%;
             max-width: 420px;
@@ -48,14 +117,10 @@
             overflow: hidden;
         }
 
-        /* モバイル用デフォルト */
         @media (max-width: 449px) {
-            .app-container {
-                height: 100dvh;
-            }
+            .app-container { height: 100dvh; }
         }
 
-        /* PC/タブレット用フレーム */
         @media (min-width: 450px) {
             .app-container {
                 height: 90vh;
@@ -66,28 +131,14 @@
             }
         }
 
-        /* --- エリア分割 --- */
-
         .scroll-view {
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            width: 100%;
-            position: relative;
             scrollbar-width: none;
         }
         .scroll-view::-webkit-scrollbar { display: none; }
 
-        .footer-area {
-            flex-shrink: 0;
-            background: white;
-            padding: 1rem 1.5rem 1.5rem;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
-            z-index: 50;
-            width: 100%;
-        }
-
-        /* ヘッダー */
         .header-bg {
             background-color: #10b981;
             padding: 3rem 1.5rem 4rem;
@@ -100,38 +151,18 @@
             z-index: 10;
         }
 
-        /* タイトルアニメーション */
-        @keyframes popJump {
-            0%, 90%, 100% {
-                transform: translateY(0) scale(1);
-            }
-            92% {
-                transform: translateY(2px) scale(0.98, 1.02); /* 踏み込み */
-            }
-            95% {
-                transform: translateY(-8px) scale(1.02, 0.98); /* ジャンプ */
-            }
-            98% {
-                transform: translateY(0) scale(1); /* 着地 */
-            }
-        }
-
         .app-title {
-            /* Varela Round (丸いフォント) に変更 */
             font-family: "Varela Round", sans-serif;
-            font-size: 3rem; /* 3.5rem -> 3rem に変更 */
+            font-size: 3.5rem;
             font-weight: 800;
             line-height: 1;
             margin-bottom: 0.5rem;
             letter-spacing: -0.03em;
-            
-            /* アニメーション適用 */
-            display: inline-block;
-            animation: popJump 4s infinite ease-in-out;
-            transform-origin: bottom center;
+            /* メイン画面の文字も少し太く */
+            -webkit-text-stroke: 2px white;
+            paint-order: stroke fill;
         }
 
-        /* コンテンツ中身 */
         .content-area {
             padding: 1.5rem;
             margin-top: -3rem;
@@ -140,7 +171,6 @@
             padding-bottom: 2rem;
         }
 
-        /* カード共通 */
         .card {
             background: white;
             border-radius: 24px;
@@ -150,7 +180,14 @@
             margin-bottom: 1rem;
         }
 
-        /* 時間入力 */
+        /* アニメーション用 */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .anim-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* 入力フォーム */
         input[type="datetime-local"] {
             font-family: "Barlow Semi Condensed", sans-serif;
             font-size: 1.3rem;
@@ -163,8 +200,6 @@
             text-align: center;
             outline: none;
             font-weight: 600;
-            -webkit-appearance: none;
-            letter-spacing: 0.02em;
         }
         input[type="datetime-local"]:focus {
             background: #ecfdf5;
@@ -172,13 +207,12 @@
             box-shadow: inset 0 0 0 3px #10b981;
         }
 
-        /* モード選択ボタン */
+        /* モード選択 */
         .mode-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
         }
-        
         .mode-btn {
             display: flex;
             flex-direction: column;
@@ -189,9 +223,8 @@
             background: #f8fafc;
             border: 2px solid transparent;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s;
         }
-
         .mode-btn.active {
             background: #fff;
             border-color: #10b981;
@@ -199,168 +232,93 @@
             transform: translateY(-2px);
             border-width: 3px;
         }
-
-        .mode-icon {
-            font-size: 1.8rem;
-            margin-bottom: 0.25rem;
-        }
-        .mode-label {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #64748b;
-        }
-        .mode-time {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-top: 2px;
-            font-family: "Barlow Semi Condensed", sans-serif;
-            font-weight: 600;
-        }
+        .mode-icon { font-size: 1.8rem; margin-bottom: 0.25rem; }
+        .mode-label { font-size: 0.85rem; font-weight: bold; color: #64748b; }
+        .mode-time { font-size: 0.8rem; color: #94a3b8; font-family: "Barlow Semi Condensed", sans-serif; font-weight: 600; }
         .mode-btn.active .mode-label { color: #059669; }
         .mode-btn.active .mode-time { color: #10b981; }
 
-        /* 結果表示エリア */
-        .timeline {
-            position: relative;
-            padding-left: 20px;
-        }
+        /* タイムライン */
+        .timeline { position: relative; padding-left: 20px; }
         .timeline::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 10px;
-            bottom: 10px;
-            width: 4px;
-            background: #e2e8f0;
-            border-radius: 4px;
+            content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 4px; background: #e2e8f0; border-radius: 4px;
         }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 1.8rem;
-            padding-left: 1.5rem;
-        }
+        .timeline-item { position: relative; margin-bottom: 1.8rem; padding-left: 1.5rem; }
         .timeline-item:last-child { margin-bottom: 0; }
-        
         .timeline-dot {
-            position: absolute;
-            left: -5px;
-            top: 5px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: white;
-            border: 4px solid #cbd5e1;
-            z-index: 1;
+            position: absolute; left: -5px; top: 5px; width: 14px; height: 14px;
+            border-radius: 50%; background: white; border: 4px solid #cbd5e1; z-index: 1;
         }
         .timeline-item.highlight .timeline-dot {
-            border-color: #10b981;
-            background: #10b981;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+            border-color: #10b981; background: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
         }
+        .time-display { font-family: "Barlow Semi Condensed", sans-serif; letter-spacing: 0.02em; color: #475569; }
+        #startTimeDisplay { color: #334155; }
 
-        /* 数字表示 */
-        .time-display {
-            font-family: "Barlow Semi Condensed", sans-serif;
-            letter-spacing: 0.02em;
-            color: #475569;
+        /* フッター */
+        .footer-area {
+            flex-shrink: 0; background: white; padding: 1rem 1.5rem 1.5rem;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.03); z-index: 50; width: 100%;
         }
-        #startTimeDisplay {
-            color: #334155; 
-        }
-
-        /* ボタン */
         .btn-main {
-            width: 100%;
-            background: #10b981;
-            color: white;
-            font-weight: bold;
-            padding: 1.2rem;
-            border-radius: 100px;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
+            width: 100%; background: #10b981; color: white; font-weight: bold;
+            padding: 1.2rem; border-radius: 100px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            transition: transform 0.2s; cursor: pointer;
         }
-        .btn-main:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-        }
+        .btn-main:active { transform: scale(0.98); }
 
-        /* アニメーション */
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .anim-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .hidden { display: none; }
-
     </style>
 </head>
 
 <body>
 
+    <!-- オープニング画面 -->
+    <div id="opening-screen">
+        <h1 class="opening-title">MamoRun</h1>
+    </div>
+
+    <!-- アプリ本体 -->
     <div class="app-container">
-        
-        <!-- スクロール可能なコンテンツエリア -->
         <div class="scroll-view">
-            <!-- ヘッダー -->
             <div class="header-bg">
                 <h1 class="app-title">MamoRun</h1>
                 <p class="text-sm opacity-90 font-medium">逆算して、ちょうどよく動く。</p>
             </div>
 
-            <!-- コンテンツ -->
             <div class="content-area space-y-6">
-
-                <!-- 1. 集合時間入力 -->
+                <!-- 1. 集合時間 -->
                 <div class="card anim-up" style="animation-delay: 0s;">
                     <label class="block text-xs font-bold text-gray-400 mb-2 tracking-widest">集合時間 (GOAL)</label>
                     <input type="datetime-local" id="meetingTime" onchange="calculateSchedule()">
                 </div>
 
-                <!-- 2. 準備モード選択 -->
+                <!-- 2. モード選択 -->
                 <div class="anim-up" style="animation-delay: 0.1s;">
                     <label class="block text-xs font-bold text-gray-400 mb-2 px-1 tracking-widest">準備モード (MODE)</label>
                     <div class="mode-grid">
-                        <!-- 最短モード -->
                         <div class="mode-btn" onclick="selectMode(15, this)" id="modeRush">
-                            <span class="mode-icon">🏃</span>
-                            <span class="mode-label">お急ぎ</span>
-                            <span class="mode-time">15 min</span>
+                            <span class="mode-icon">🏃</span><span class="mode-label">お急ぎ</span><span class="mode-time">15 min</span>
                         </div>
-                        <!-- 通常モード (Default) -->
                         <div class="mode-btn active" onclick="selectMode(45, this)" id="modeNormal">
-                            <span class="mode-icon">☕️</span>
-                            <span class="mode-label">いつもの</span>
-                            <span class="mode-time">45 min</span>
+                            <span class="mode-icon">☕️</span><span class="mode-label">いつもの</span><span class="mode-time">45 min</span>
                         </div>
-                        <!-- しっかりモード -->
                         <div class="mode-btn" onclick="selectMode(90, this)" id="modePerfect">
-                            <span class="mode-icon">✨</span>
-                            <span class="mode-label">しっかり</span>
-                            <span class="mode-time">90 min</span>
+                            <span class="mode-icon">✨</span><span class="mode-label">しっかり</span><span class="mode-time">90 min</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. 結果タイムライン -->
+                <!-- 3. 結果 -->
                 <div id="resultArea" class="card anim-up hidden" style="animation-delay: 0.2s;">
                     <div class="timeline">
-                        
-                        <!-- 準備開始 (ここが一番重要) -->
                         <div class="timeline-item highlight">
                             <div class="timeline-dot"></div>
                             <p class="text-xs font-bold text-emerald-600 mb-1">準備スタート</p>
                             <p id="startTimeDisplay" class="text-3xl font-bold leading-none time-display">--:--</p>
                             <p class="text-xs text-gray-400 mt-1">ここから準備開始</p>
                         </div>
-
-                        <!-- 出発 -->
                         <div class="timeline-item">
                             <div class="timeline-dot"></div>
                             <p class="text-xs font-bold text-gray-400 mb-1">家を出る</p>
@@ -369,20 +327,16 @@
                                 <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">移動 45分 (仮)</span>
                             </div>
                         </div>
-
-                        <!-- 到着 -->
                         <div class="timeline-item">
                             <div class="timeline-dot"></div>
                             <p class="text-xs font-bold text-gray-400 mb-1">目的地に到着</p>
                             <p id="goalTimeDisplay" class="text-xl font-bold time-display">--:--</p>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 固定フッター（ボタンエリア） -->
         <div class="footer-area">
             <button onclick="setReminder()" class="btn-main">
                 <span>タイマーをセット</span>
@@ -391,10 +345,9 @@
                 </svg>
             </button>
         </div>
-
     </div>
 
-    <!-- シンプルアラート -->
+    <!-- アラート -->
     <div id="alertBox" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden z-[100]">
         <div class="bg-white p-6 rounded-3xl w-10/12 max-w-xs text-center shadow-2xl">
             <h3 class="text-xl font-bold text-emerald-600 mb-2">お知らせ</h3>
@@ -404,126 +357,84 @@
     </div>
 
     <script>
-        // 設定値
-        const MOCK_TRAVEL_TIME_MIN = 45; // 移動時間（今回は固定）
-        let currentPrepTimeMin = 45; // 初期値: USUALモード
+        const MOCK_TRAVEL_TIME_MIN = 45; 
+        let currentPrepTimeMin = 45; 
         let reminderTimeoutId = null;
 
-        // 初期化
         document.addEventListener('DOMContentLoaded', () => {
+            // オープニングアニメーション制御 (2秒後に消える)
+            setTimeout(() => {
+                document.getElementById('opening-screen').classList.add('fade-out');
+            }, 2000);
+
+            // 初期時刻設定
             const now = new Date();
-            // デフォルトを今の1時間後に設定して、使い手がイメージしやすくする
             now.setHours(now.getHours() + 2);
             now.setMinutes(0);
             
-            const toLocalISO = (date) => {
+            const toLocalISO = (d) => {
                 const pad = (n) => n.toString().padStart(2, '0');
-                return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+                return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
             };
-            
             document.getElementById('meetingTime').value = toLocalISO(now);
             
-            if ('Notification' in window && Notification.permission !== 'granted') {
-                Notification.requestPermission();
-            }
-
-            // 初回の計算実行
+            if ('Notification' in window && Notification.permission !== 'granted') Notification.requestPermission();
             calculateSchedule();
         });
 
-        // モード選択処理
-        function selectMode(minutes, element) {
-            currentPrepTimeMin = minutes;
-            
-            // スタイルの切り替え
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            element.classList.add('active');
-
-            // 再計算
+        function selectMode(min, el) {
+            currentPrepTimeMin = min;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
             calculateSchedule();
         }
 
-        // スケジュール計算ロジック（入力やモード変更時に即時反映）
         function calculateSchedule() {
-            const meetingTimeVal = document.getElementById('meetingTime').value;
-            if (!meetingTimeVal) return;
-
-            const meetingDate = new Date(meetingTimeVal);
+            const val = document.getElementById('meetingTime').value;
+            if (!val) return;
+            const meet = new Date(val);
+            const leave = new Date(meet.getTime() - (MOCK_TRAVEL_TIME_MIN * 60000));
+            const start = new Date(leave.getTime() - (currentPrepTimeMin * 60000));
             
-            // 1. 出発時間 = 集合 - 移動
-            const leaveDate = new Date(meetingDate.getTime() - (MOCK_TRAVEL_TIME_MIN * 60 * 1000));
-            
-            // 2. 準備開始時間 = 出発 - 準備モード時間
-            const startDate = new Date(leaveDate.getTime() - (currentPrepTimeMin * 60 * 1000));
-
-            // 表示更新
-            const timeFormat = { hour: '2-digit', minute: '2-digit' };
-            
-            document.getElementById('startTimeDisplay').textContent = startDate.toLocaleTimeString('ja-JP', timeFormat);
-            document.getElementById('leaveTimeDisplay').textContent = leaveDate.toLocaleTimeString('ja-JP', timeFormat);
-            document.getElementById('goalTimeDisplay').textContent = meetingDate.toLocaleTimeString('ja-JP', timeFormat);
-
-            // 結果エリアを表示
-            const resultArea = document.getElementById('resultArea');
-            resultArea.classList.remove('hidden');
+            const fmt = { hour: '2-digit', minute: '2-digit' };
+            document.getElementById('startTimeDisplay').textContent = start.toLocaleTimeString('ja-JP', fmt);
+            document.getElementById('leaveTimeDisplay').textContent = leave.toLocaleTimeString('ja-JP', fmt);
+            document.getElementById('goalTimeDisplay').textContent = meet.toLocaleTimeString('ja-JP', fmt);
+            document.getElementById('resultArea').classList.remove('hidden');
         }
 
-        // リマインダーセット
         function setReminder() {
-            const meetingTimeVal = document.getElementById('meetingTime').value;
-            if (!meetingTimeVal) {
-                showAlert('集合時間を設定してください');
-                return;
-            }
-
-            const meetingDate = new Date(meetingTimeVal);
+            const val = document.getElementById('meetingTime').value;
+            if (!val) return showAlert('集合時間を設定してください');
+            
+            const meet = new Date(val);
             const now = new Date();
-            
-            // 準備開始時間の再計算
-            const leaveDateMs = meetingDate.getTime() - (MOCK_TRAVEL_TIME_MIN * 60 * 1000);
-            const startDateMs = leaveDateMs - (currentPrepTimeMin * 60 * 1000);
-            
-            const timeUntilStart = startDateMs - now.getTime();
+            const startMs = meet.getTime() - (MOCK_TRAVEL_TIME_MIN * 60000) - (currentPrepTimeMin * 60000);
+            const diff = startMs - now.getTime();
 
-            if (timeUntilStart <= 0) {
-                showAlert('準備開始時間を過ぎています！\n「お急ぎ」モードに切り替えるか、時間を変更してください。');
-                return;
-            }
+            if (diff <= 0) return showAlert('準備開始時間を過ぎています！');
 
             if (reminderTimeoutId) clearTimeout(reminderTimeoutId);
-
             reminderTimeoutId = setTimeout(() => {
-                new Notification("MamoRun", {
-                    body: "準備を開始する時間です！ゆっくり支度を始めましょう。",
-                    icon: "https://placehold.co/64x64/10b981/ffffff?text=Go"
-                });
-                showAlert('時間になりました！\n準備を開始してください。');
-            }, timeUntilStart);
+                new Notification("MamoRun", { body: "準備開始の時間です！", icon: "https://placehold.co/64x64/10b981/ffffff?text=Go" });
+                showAlert('時間になりました！準備を開始してください。');
+            }, diff);
 
-            const minutesLeft = Math.ceil(timeUntilStart / 1000 / 60);
-            showAlert(`タイマーをセットしました。\n${minutesLeft}分後に通知します。`);
+            showAlert(`タイマーをセットしました。\n${Math.ceil(diff/60000)}分後に通知します。`);
         }
 
-        // カスタムアラート
-        function showAlert(msg) {
-            document.getElementById('alertText').innerText = msg;
+        function showAlert(m) {
+            document.getElementById('alertText').innerText = m;
             document.getElementById('alertBox').classList.remove('hidden');
         }
         function closeAlert() {
             document.getElementById('alertBox').classList.add('hidden');
         }
 
-    </script>
-    <script>
-        (function (d) {
-            var config = {
-                kitId: 'ohm1sor',
-                scriptTimeout: 3000,
-                async: true
-            },
-                h = d.documentElement, t = setTimeout(function () { h.className = h.className.replace(/\bwf-loading\b/g, "") + " wf-inactive"; }, config.scriptTimeout), tk = d.createElement("script"), f = false, s = d.getElementsByTagName("script")[0], a; h.className = "wf-loading"; tk.src = 'https://use.typekit.net/' + config.kitId + '.js'; tk.async = true; tk.onload = tk.onreadystatechange = function () { a = this.readyState; if (f || a && a != "complete" && a != "loaded") return; f = true; clearTimeout(t); try { Typekit.load(config) } catch (e) { } }; s.parentNode.insertBefore(tk, s)
+        // フォントローダー
+        (function(d) {
+            var config = { kitId: 'ohm1sor', scriptTimeout: 3000, async: true },
+            h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className="wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
         })(document);
     </script>
 </body>
